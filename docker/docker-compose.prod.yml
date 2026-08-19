@@ -1,0 +1,65 @@
+# Production stack — one ARM instance (BUILD-PLAN §9).
+# Deploy: docker compose -f docker/docker-compose.prod.yml pull && up -d
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+  app:
+    image: ghcr.io/partha607/n8e_survey:${APP_TAG:-latest}
+    restart: unless-stopped
+    env_file: /srv/n8e-collect/.env
+    environment:
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3000/api/core/v1/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # one-shot migration runner: docker compose run --rm migrate
+  migrate:
+    image: ghcr.io/partha607/n8e_survey:migrate-${APP_TAG:-latest}
+    profiles: ["tools"]
+    env_file: /srv/n8e-collect/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: n8e
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in server env}
+      POSTGRES_DB: n8e_collect
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U n8e -d n8e_collect"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

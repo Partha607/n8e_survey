@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: n8e
+          POSTGRES_PASSWORD: n8e_dev_password
+          POSTGRES_DB: n8e_collect
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U n8e -d n8e_collect"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      DATABASE_URL: postgres://n8e:n8e_dev_password@localhost:5432/n8e_collect
+      DATABASE_URL_TEST: postgres://n8e:n8e_dev_password@localhost:5432/n8e_collect_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: License allowlist (CLAUDE.md rule 1)
+        run: pnpm licenses:check
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Create test database
+        run: |
+          PGPASSWORD=n8e_dev_password psql -h localhost -U n8e -d n8e_collect \
+            -c "CREATE DATABASE n8e_collect_test"
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Migrate + seed (e2e database)
+        run: |
+          pnpm drizzle:migrate
+          ADMIN_PASSWORD=ci-seed-password pnpm db:seed
+
+      - name: Install Playwright browsers
+        run: pnpm playwright install --with-deps chromium
+
+      - name: E2E tests
+        run: pnpm e2e

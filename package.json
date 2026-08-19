@@ -16,7 +16,8 @@
     "prepare": "husky",
     "drizzle:generate": "drizzle-kit generate",
     "drizzle:migrate": "drizzle-kit migrate",
-    "db:seed": "tsx scripts/seed.ts"
+    "db:seed": "tsx scripts/seed.ts",
+    "licenses:check": "node scripts/check-licenses.mjs"
   },
   "lint-staged": {
     "*.{ts,tsx,mjs,js}": [
@@ -61,5 +62,10 @@
     "typescript": "^5",
     "vitest": "^4.1.11"
   },
-  "packageManager": "pnpm@10.33.0"
+  "packageManager": "pnpm@10.33.0",
+  "pnpm": {
+    "ignoredOptionalDependencies": [
+      "sharp"
+    ]
+  }
 }
