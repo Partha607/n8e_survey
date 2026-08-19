@@ -1,0 +1,45 @@
+/*
+ * Veritas UI tokens — STUB (Milestone 0.1).
+ * Real brand hex values and typefaces are imported from the n8elabs.com repo
+ * tokens during Phase 0 wrap-up — do NOT invent brand colors here
+ * (BUILD-PLAN.md §5.1: "[TK: import brand hex from n8elabs-website repo]").
+ *
+ * Structure locked now so Tailwind can map to these custom properties:
+ *  - neutral surface stack on a near-black editorial base
+ *  - one active accent (Theme Green default; Maroon/Neon-Red alternate)
+ *  - semantic colors muted to sit inside the editorial palette
+ *  - 4px space grid; radii 8/12/999; motion durations 120/200/320ms
+ */
+:root {
+  /* surfaces (placeholder neutrals — replaced by brand tokens) */
+  --bg: #0a0a0a;
+  --surface-1: #111111;
+  --surface-2: #171717;
+  --surface-3: #1d1d1d;
+  --border-hairline: rgba(255, 255, 255, 0.08);
+
+  /* text */
+  --text-primary: #ededed;
+  --text-muted: #9a9a9a;
+
+  /* accent — TK: pull exact hex from n8elabs.com tokens (Theme Green) */
+  --accent: #2f8f5b;
+  /* alternate accent — TK: Maroon/Neon-Red from n8elabs.com Theme 2 */
+  --accent-alt: #8f2f3b;
+
+  /* semantic (muted, desaturated) */
+  --ok: #4d8f6d;
+  --warn: #a68a4d;
+  --danger: #a65b5b;
+  --info: #5b7da6;
+
+  /* radii */
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-pill: 999px;
+
+  /* motion */
+  --dur-state: 120ms;
+  --dur-reveal: 200ms;
+  --dur-page: 320ms;
+}

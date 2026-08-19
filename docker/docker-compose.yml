@@ -1,0 +1,41 @@
+# Local dev stack (caddy-less; Caddy joins in Milestone 0.4's deploy compose).
+# Default `docker compose -f docker/docker-compose.yml up -d` boots Postgres only;
+# the app runs on the host via `pnpm dev`. `--profile app` also runs the app in
+# a container (dev target) for parity checks.
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: n8e
+      POSTGRES_PASSWORD: n8e_dev_password
+      POSTGRES_DB: n8e_collect
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U n8e -d n8e_collect"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    profiles: ["app"]
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: dev
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://n8e:n8e_dev_password@postgres:5432/n8e_collect
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ../src:/app/src
+      - ../public:/app/public
+
+volumes:
+  pgdata:
