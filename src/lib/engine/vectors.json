@@ -1,0 +1,618 @@
+{
+  "definitions": {
+    "basic": {
+      "schemaVersion": 1,
+      "mode": "conversational",
+      "pages": [
+        {
+          "key": "page_1",
+          "questions": [
+            {
+              "key": "q_color",
+              "type": "single_choice",
+              "label": "Favourite colour?",
+              "required": true,
+              "options": [
+                { "key": "opt_red", "label": "Red" },
+                { "key": "opt_blue", "label": "Blue" }
+              ]
+            },
+            {
+              "key": "q_why",
+              "type": "long_text",
+              "label": "Why red?",
+              "required": false
+            },
+            {
+              "key": "q_age",
+              "type": "number",
+              "label": "Your age",
+              "required": false
+            },
+            {
+              "key": "q_tags",
+              "type": "multi_choice",
+              "label": "Pick tags",
+              "required": false,
+              "options": [
+                { "key": "opt_a", "label": "A" },
+                { "key": "opt_b", "label": "B" },
+                { "key": "opt_c", "label": "C" }
+              ]
+            },
+            {
+              "key": "q_note",
+              "type": "short_text",
+              "label": "A note",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "logic": [
+        {
+          "id": "show_why_when_red",
+          "when": {
+            "op": "and",
+            "clauses": [{ "q": "q_color", "cmp": "eq", "value": "opt_red" }]
+          },
+          "action": { "kind": "show_question", "target": "q_why" }
+        }
+      ],
+      "presentation": { "showProgress": true }
+    },
+    "ordering": {
+      "schemaVersion": 1,
+      "mode": "conversational",
+      "pages": [
+        {
+          "key": "page_1",
+          "questions": [
+            { "key": "q_a", "type": "number", "label": "A", "required": false },
+            { "key": "q_b", "type": "short_text", "label": "B", "required": false }
+          ]
+        }
+      ],
+      "logic": [
+        {
+          "id": "r1_show_b",
+          "when": { "op": "and", "clauses": [{ "q": "q_a", "cmp": "gt", "value": 5 }] },
+          "action": { "kind": "show_question", "target": "q_b" }
+        },
+        {
+          "id": "r2_hide_b",
+          "when": { "op": "and", "clauses": [{ "q": "q_a", "cmp": "gt", "value": 10 }] },
+          "action": { "kind": "hide_question", "target": "q_b" }
+        }
+      ],
+      "presentation": { "showProgress": true }
+    },
+    "orderingReversed": {
+      "schemaVersion": 1,
+      "mode": "conversational",
+      "pages": [
+        {
+          "key": "page_1",
+          "questions": [
+            { "key": "q_a", "type": "number", "label": "A", "required": false },
+            { "key": "q_b", "type": "short_text", "label": "B", "required": false }
+          ]
+        }
+      ],
+      "logic": [
+        {
+          "id": "r1_hide_b",
+          "when": { "op": "and", "clauses": [{ "q": "q_a", "cmp": "gt", "value": 10 }] },
+          "action": { "kind": "hide_question", "target": "q_b" }
+        },
+        {
+          "id": "r2_show_b",
+          "when": { "op": "and", "clauses": [{ "q": "q_a", "cmp": "gt", "value": 5 }] },
+          "action": { "kind": "show_question", "target": "q_b" }
+        }
+      ],
+      "presentation": { "showProgress": true }
+    },
+    "chain": {
+      "schemaVersion": 1,
+      "mode": "conversational",
+      "pages": [
+        {
+          "key": "page_1",
+          "questions": [
+            { "key": "q_start", "type": "number", "label": "Start", "required": false },
+            { "key": "q_mid", "type": "number", "label": "Mid", "required": false },
+            { "key": "q_leaf", "type": "short_text", "label": "Leaf", "required": false }
+          ]
+        }
+      ],
+      "logic": [
+        {
+          "id": "show_mid",
+          "when": {
+            "op": "and",
+            "clauses": [{ "q": "q_start", "cmp": "gte", "value": 1 }]
+          },
+          "action": { "kind": "show_question", "target": "q_mid" }
+        },
+        {
+          "id": "show_leaf",
+          "when": {
+            "op": "and",
+            "clauses": [{ "q": "q_mid", "cmp": "gte", "value": 1 }]
+          },
+          "action": { "kind": "show_question", "target": "q_leaf" }
+        }
+      ],
+      "presentation": { "showProgress": true }
+    },
+    "skipper": {
+      "schemaVersion": 1,
+      "mode": "paged",
+      "pages": [
+        {
+          "key": "page_1",
+          "questions": [
+            {
+              "key": "q_customer",
+              "type": "single_choice",
+              "label": "Are you a customer?",
+              "required": true,
+              "options": [
+                { "key": "opt_yes", "label": "Yes" },
+                { "key": "opt_no", "label": "No" }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "page_2",
+          "questions": [
+            {
+              "key": "q_product",
+              "type": "short_text",
+              "label": "Which product?",
+              "required": false
+            },
+            { "key": "q_rating", "type": "rating", "label": "Rate it", "required": false }
+          ]
+        },
+        {
+          "key": "page_3",
+          "questions": [
+            {
+              "key": "q_final",
+              "type": "long_text",
+              "label": "Final comments",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "logic": [
+        {
+          "id": "skip_noncustomers",
+          "when": {
+            "op": "and",
+            "clauses": [{ "q": "q_customer", "cmp": "eq", "value": "opt_no" }]
+          },
+          "action": { "kind": "skip_to_page", "target": "page_3" }
+        }
+      ],
+      "presentation": { "showProgress": true }
+    },
+    "gatekeeper": {
+      "schemaVersion": 1,
+      "mode": "conversational",
+      "pages": [
+        {
+          "key": "page_1",
+          "questions": [
+            { "key": "q_age", "type": "number", "label": "Age", "required": true },
+            {
+              "key": "q_consent",
+              "type": "single_choice",
+              "label": "Consent?",
+              "required": true,
+              "options": [
+                { "key": "opt_yes", "label": "Yes" },
+                { "key": "opt_no", "label": "No" }
+              ]
+            },
+            {
+              "key": "q_body",
+              "type": "long_text",
+              "label": "Main question",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "logic": [
+        {
+          "id": "dq_minors",
+          "when": {
+            "op": "and",
+            "clauses": [{ "q": "q_age", "cmp": "lt", "value": 18 }]
+          },
+          "action": { "kind": "disqualify" }
+        },
+        {
+          "id": "end_no_consent",
+          "when": {
+            "op": "and",
+            "clauses": [{ "q": "q_consent", "cmp": "eq", "value": "opt_no" }]
+          },
+          "action": { "kind": "end" }
+        },
+        {
+          "id": "after_stop_never_fires",
+          "when": {
+            "op": "and",
+            "clauses": [{ "q": "q_age", "cmp": "lt", "value": 18 }]
+          },
+          "action": { "kind": "hide_question", "target": "q_body" }
+        }
+      ],
+      "presentation": { "showProgress": true }
+    },
+    "quiz": {
+      "schemaVersion": 1,
+      "mode": "conversational",
+      "pages": [
+        {
+          "key": "page_1",
+          "questions": [
+            {
+              "key": "q_capital",
+              "type": "single_choice",
+              "label": "Capital of Assam?",
+              "required": true,
+              "options": [
+                { "key": "opt_dispur", "label": "Dispur" },
+                { "key": "opt_guwahati", "label": "Guwahati" }
+              ]
+            },
+            {
+              "key": "q_rivers",
+              "type": "multi_choice",
+              "label": "Rivers of NE India?",
+              "required": true,
+              "options": [
+                { "key": "opt_brahmaputra", "label": "Brahmaputra" },
+                { "key": "opt_barak", "label": "Barak" },
+                { "key": "opt_ganga", "label": "Ganga" }
+              ]
+            }
+          ]
+        }
+      ],
+      "logic": [],
+      "scoring": {
+        "points": {
+          "q_capital": { "opt_dispur": 2, "opt_guwahati": 0 },
+          "q_rivers": { "opt_brahmaputra": 1, "opt_barak": 1, "opt_ganga": -1 }
+        },
+        "bands": [
+          { "key": "band_low", "label": "Novice", "min": -1, "max": 1 },
+          { "key": "band_mid", "label": "Learner", "min": 2, "max": 3 },
+          { "key": "band_high", "label": "Expert", "min": 4, "max": 4 }
+        ]
+      },
+      "presentation": { "showProgress": true }
+    }
+  },
+  "vectors": [
+    {
+      "name": "eq scalar true shows target",
+      "def": "basic",
+      "answers": { "q_color": "opt_red" },
+      "expect": { "visibleIncludes": ["q_why"], "fired": ["show_why_when_red"] }
+    },
+    {
+      "name": "eq scalar false keeps show-target hidden",
+      "def": "basic",
+      "answers": { "q_color": "opt_blue" },
+      "expect": { "hiddenIncludes": ["q_why"], "fired": [] }
+    },
+    {
+      "name": "show-target hidden by default with no answers",
+      "def": "basic",
+      "answers": {},
+      "expect": { "hiddenIncludes": ["q_why"], "visibleIncludes": ["q_color", "q_age"] }
+    },
+    {
+      "name": "eq on multi-choice means includes",
+      "def": "basic",
+      "answers": { "q_tags": ["opt_a", "opt_c"], "q_color": "opt_blue" },
+      "expect": {
+        "clause": { "q": "q_tags", "cmp": "eq", "value": "opt_c" },
+        "result": true
+      }
+    },
+    {
+      "name": "eq on multi-choice absent value",
+      "def": "basic",
+      "answers": { "q_tags": ["opt_a"] },
+      "expect": {
+        "clause": { "q": "q_tags", "cmp": "eq", "value": "opt_b" },
+        "result": false
+      }
+    },
+    {
+      "name": "neq scalar",
+      "def": "basic",
+      "answers": { "q_color": "opt_blue" },
+      "expect": {
+        "clause": { "q": "q_color", "cmp": "neq", "value": "opt_red" },
+        "result": true
+      }
+    },
+    {
+      "name": "neq unanswered is true",
+      "def": "basic",
+      "answers": {},
+      "expect": {
+        "clause": { "q": "q_color", "cmp": "neq", "value": "opt_red" },
+        "result": true
+      }
+    },
+    {
+      "name": "in scalar member",
+      "def": "basic",
+      "answers": { "q_color": "opt_blue" },
+      "expect": {
+        "clause": { "q": "q_color", "cmp": "in", "value": ["opt_red", "opt_blue"] },
+        "result": true
+      }
+    },
+    {
+      "name": "in scalar non-member",
+      "def": "basic",
+      "answers": { "q_color": "opt_blue" },
+      "expect": {
+        "clause": { "q": "q_color", "cmp": "in", "value": ["opt_red"] },
+        "result": false
+      }
+    },
+    {
+      "name": "in multi-choice intersects",
+      "def": "basic",
+      "answers": { "q_tags": ["opt_b"] },
+      "expect": {
+        "clause": { "q": "q_tags", "cmp": "in", "value": ["opt_a", "opt_b"] },
+        "result": true
+      }
+    },
+    {
+      "name": "gt true",
+      "def": "basic",
+      "answers": { "q_age": 30 },
+      "expect": { "clause": { "q": "q_age", "cmp": "gt", "value": 18 }, "result": true }
+    },
+    {
+      "name": "gt equal is false",
+      "def": "basic",
+      "answers": { "q_age": 18 },
+      "expect": { "clause": { "q": "q_age", "cmp": "gt", "value": 18 }, "result": false }
+    },
+    {
+      "name": "gte equal is true",
+      "def": "basic",
+      "answers": { "q_age": 18 },
+      "expect": { "clause": { "q": "q_age", "cmp": "gte", "value": 18 }, "result": true }
+    },
+    {
+      "name": "lt true",
+      "def": "basic",
+      "answers": { "q_age": 12 },
+      "expect": { "clause": { "q": "q_age", "cmp": "lt", "value": 18 }, "result": true }
+    },
+    {
+      "name": "lte equal is true",
+      "def": "basic",
+      "answers": { "q_age": 18 },
+      "expect": { "clause": { "q": "q_age", "cmp": "lte", "value": 18 }, "result": true }
+    },
+    {
+      "name": "numeric compare on unanswered is false",
+      "def": "basic",
+      "answers": {},
+      "expect": { "clause": { "q": "q_age", "cmp": "gt", "value": 0 }, "result": false }
+    },
+    {
+      "name": "numeric compare on string number coerces",
+      "def": "basic",
+      "answers": { "q_age": "25" },
+      "expect": { "clause": { "q": "q_age", "cmp": "gte", "value": 21 }, "result": true }
+    },
+    {
+      "name": "answered on zero is true",
+      "def": "basic",
+      "answers": { "q_age": 0 },
+      "expect": { "clause": { "q": "q_age", "cmp": "answered" }, "result": true }
+    },
+    {
+      "name": "answered on empty string is false",
+      "def": "basic",
+      "answers": { "q_note": "  " },
+      "expect": { "clause": { "q": "q_note", "cmp": "answered" }, "result": false }
+    },
+    {
+      "name": "answered on empty array is false",
+      "def": "basic",
+      "answers": { "q_tags": [] },
+      "expect": { "clause": { "q": "q_tags", "cmp": "answered" }, "result": false }
+    },
+    {
+      "name": "not_answered on missing is true",
+      "def": "basic",
+      "answers": {},
+      "expect": { "clause": { "q": "q_note", "cmp": "not_answered" }, "result": true }
+    },
+    {
+      "name": "contains substring case-insensitive",
+      "def": "basic",
+      "answers": { "q_note": "Loves Guwahati tea" },
+      "expect": {
+        "clause": { "q": "q_note", "cmp": "contains", "value": "guwahati" },
+        "result": true
+      }
+    },
+    {
+      "name": "contains on array is membership",
+      "def": "basic",
+      "answers": { "q_tags": ["opt_a"] },
+      "expect": {
+        "clause": { "q": "q_tags", "cmp": "contains", "value": "opt_a" },
+        "result": true
+      }
+    },
+    {
+      "name": "rule order: later hide wins over earlier show",
+      "def": "ordering",
+      "answers": { "q_a": 20 },
+      "expect": { "hiddenIncludes": ["q_b"], "fired": ["r1_show_b", "r2_hide_b"] }
+    },
+    {
+      "name": "rule order: show fires alone in mid range",
+      "def": "ordering",
+      "answers": { "q_a": 7 },
+      "expect": { "visibleIncludes": ["q_b"], "fired": ["r1_show_b"] }
+    },
+    {
+      "name": "rule order reversed: later show wins",
+      "def": "orderingReversed",
+      "answers": { "q_a": 20 },
+      "expect": { "visibleIncludes": ["q_b"], "fired": ["r1_hide_b", "r2_show_b"] }
+    },
+    {
+      "name": "skip makes intermediate page unreachable",
+      "def": "skipper",
+      "answers": { "q_customer": "opt_no" },
+      "expect": {
+        "unreachablePages": ["page_2"],
+        "hiddenIncludes": ["q_product", "q_rating"],
+        "visibleIncludes": ["q_final"]
+      }
+    },
+    {
+      "name": "no skip when customer",
+      "def": "skipper",
+      "answers": { "q_customer": "opt_yes" },
+      "expect": {
+        "unreachablePages": [],
+        "visibleIncludes": ["q_product", "q_rating", "q_final"]
+      }
+    },
+    {
+      "name": "disqualify fires and halts later rules",
+      "def": "gatekeeper",
+      "answers": { "q_age": 15 },
+      "expect": {
+        "disqualified": true,
+        "fired": ["dq_minors"],
+        "visibleIncludes": ["q_body"]
+      }
+    },
+    {
+      "name": "end fires on no-consent",
+      "def": "gatekeeper",
+      "answers": { "q_age": 30, "q_consent": "opt_no" },
+      "expect": { "ended": true, "disqualified": false, "fired": ["end_no_consent"] }
+    },
+    {
+      "name": "adult with consent proceeds",
+      "def": "gatekeeper",
+      "answers": { "q_age": 30, "q_consent": "opt_yes" },
+      "expect": { "disqualified": false, "ended": false, "fired": [] }
+    },
+    {
+      "name": "strip removes answer of rule-hidden question",
+      "def": "basic",
+      "answers": { "q_color": "opt_blue", "q_why": "smuggled" },
+      "expect": {
+        "strippedAnswers": { "q_color": "opt_blue" },
+        "strippedKeys": ["q_why"]
+      }
+    },
+    {
+      "name": "strip keeps answer while visible",
+      "def": "basic",
+      "answers": { "q_color": "opt_red", "q_why": "legit" },
+      "expect": {
+        "strippedAnswers": { "q_color": "opt_red", "q_why": "legit" },
+        "strippedKeys": []
+      }
+    },
+    {
+      "name": "strip cascades to fixpoint through chains",
+      "def": "chain",
+      "answers": { "q_start": 0, "q_mid": 5, "q_leaf": "orphan" },
+      "expect": {
+        "strippedAnswers": { "q_start": 0 },
+        "strippedKeys": ["q_mid", "q_leaf"]
+      }
+    },
+    {
+      "name": "strip removes answers on skipped pages",
+      "def": "skipper",
+      "answers": { "q_customer": "opt_no", "q_product": "sneaky", "q_final": "ok" },
+      "expect": {
+        "strippedAnswers": { "q_customer": "opt_no", "q_final": "ok" },
+        "strippedKeys": ["q_product"]
+      }
+    },
+    {
+      "name": "score: perfect quiz hits top band",
+      "def": "quiz",
+      "answers": {
+        "q_capital": "opt_dispur",
+        "q_rivers": ["opt_brahmaputra", "opt_barak"]
+      },
+      "expect": {
+        "score": {
+          "total": 4,
+          "band": "band_high",
+          "perQuestion": { "q_capital": 2, "q_rivers": 2 }
+        }
+      }
+    },
+    {
+      "name": "score: negative option subtracts",
+      "def": "quiz",
+      "answers": { "q_capital": "opt_guwahati", "q_rivers": ["opt_ganga"] },
+      "expect": {
+        "score": {
+          "total": -1,
+          "band": "band_low",
+          "perQuestion": { "q_capital": 0, "q_rivers": -1 }
+        }
+      }
+    },
+    {
+      "name": "score: mid band",
+      "def": "quiz",
+      "answers": { "q_capital": "opt_dispur", "q_rivers": ["opt_brahmaputra"] },
+      "expect": {
+        "score": {
+          "total": 3,
+          "band": "band_mid",
+          "perQuestion": { "q_capital": 2, "q_rivers": 1 }
+        }
+      }
+    },
+    {
+      "name": "score: unanswered question scores zero",
+      "def": "quiz",
+      "answers": { "q_capital": "opt_dispur" },
+      "expect": {
+        "score": {
+          "total": 2,
+          "band": "band_mid",
+          "perQuestion": { "q_capital": 2, "q_rivers": 0 }
+        }
+      }
+    }
+  ]
+}
