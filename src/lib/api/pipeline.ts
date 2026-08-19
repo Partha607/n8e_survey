@@ -91,7 +91,7 @@ export function defineRoute<P = unknown, Q = unknown, B = unknown>(
     def.rateClass ?? (plane === "session" ? "admin" : "public");
   routeRegistry.push({ summary: def.summary, scope: def.scope, plane, rateClass });
 
-  return async function route(
+  const route = async function route(
     req: NextRequest,
     routeCtx?: { params?: Promise<Record<string, string>> },
   ): Promise<NextResponse> {
@@ -191,4 +191,8 @@ export function defineRoute<P = unknown, Q = unknown, B = unknown>(
       });
     }
   };
+  // expose the definition for OpenAPI generation + generic contract tests
+  (route as unknown as { apiDef: RouteDefinition<P, Q, B> & { plane: string } }).apiDef =
+    { ...def, plane };
+  return route;
 }

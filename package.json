@@ -17,7 +17,8 @@
     "drizzle:generate": "drizzle-kit generate",
     "drizzle:migrate": "drizzle-kit migrate",
     "db:seed": "tsx scripts/seed.ts",
-    "licenses:check": "node scripts/check-licenses.mjs"
+    "licenses:check": "node scripts/check-licenses.mjs",
+    "api:openapi": "tsx scripts/generate-openapi.mjs"
   },
   "lint-staged": {
     "*.{ts,tsx,mjs,js}": [

@@ -1,0 +1,418 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "N8E API",
+    "version": "1.0.0",
+    "description": "N8E Labs' application contract. Product-first versioned namespaces: /api/collect/v1 (Collect), /api/core/v1 (shared platform)."
+  },
+  "paths": {
+    "/api/collect/v1/instruments": {
+      "get": {
+        "summary": "List instruments with live stats",
+        "x-n8e-scope": "collect:read",
+        "x-n8e-plane": "session",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success envelope { data, meta }"
+          },
+          "default": {
+            "description": "Error envelope { error: { code, message, fieldErrors?, requestId } }"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create an instrument from a type preset",
+        "x-n8e-scope": "collect:write",
+        "x-n8e-plane": "session",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success envelope { data, meta }"
+          },
+          "default": {
+            "description": "Error envelope { error: { code, message, fieldErrors?, requestId } }"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "http://json-schema.org/draft-07/schema#",
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": ["poll", "survey", "quiz", "feedback", "intake"]
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  },
+                  "slug": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 60,
+                    "pattern": "^[a-z0-9-]+$"
+                  }
+                },
+                "required": ["type", "title"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/collect/v1/instruments/{id}": {
+      "get": {
+        "summary": "Read an instrument (admin shape, includes draft)",
+        "x-n8e-scope": "collect:read",
+        "x-n8e-plane": "session",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success envelope { data, meta }"
+          },
+          "default": {
+            "description": "Error envelope { error: { code, message, fieldErrors?, requestId } }"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update draft definition and/or settings",
+        "x-n8e-scope": "collect:write",
+        "x-n8e-plane": "session",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success envelope { data, meta }"
+          },
+          "default": {
+            "description": "Error envelope { error: { code, message, fieldErrors?, requestId } }"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "http://json-schema.org/draft-07/schema#",
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  },
+                  "slug": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 60,
+                    "pattern": "^[a-z0-9-]+$"
+                  },
+                  "draftDefinition": {},
+                  "settings": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "theme": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": ["live", "closed"]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Archive an instrument, or hard-delete with ?hard=true (zero responses only)",
+        "x-n8e-scope": "collect:write",
+        "x-n8e-plane": "session",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          },
+          {
+            "name": "hard",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success envelope { data, meta }"
+          },
+          "default": {
+            "description": "Error envelope { error: { code, message, fieldErrors?, requestId } }"
+          }
+        }
+      }
+    },
+    "/api/collect/v1/instruments/{id}/duplicate": {
+      "post": {
+        "summary": "Copy the draft as a new instrument",
+        "x-n8e-scope": "collect:write",
+        "x-n8e-plane": "session",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success envelope { data, meta }"
+          },
+          "default": {
+            "description": "Error envelope { error: { code, message, fieldErrors?, requestId } }"
+          }
+        }
+      }
+    },
+    "/api/collect/v1/instruments/{id}/publish": {
+      "post": {
+        "summary": "Validate invariants and snapshot an immutable version; returns a diff + confirmation demand when responses exist on the current version",
+        "x-n8e-scope": "collect:write",
+        "x-n8e-plane": "session",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success envelope { data, meta }"
+          },
+          "default": {
+            "description": "Error envelope { error: { code, message, fieldErrors?, requestId } }"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "http://json-schema.org/draft-07/schema#",
+                "default": {},
+                "type": "object",
+                "properties": {
+                  "confirm": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/collect/v1/instruments/{id}/versions": {
+      "get": {
+        "summary": "Version history with response counts (FR-INST-09)",
+        "x-n8e-scope": "collect:read",
+        "x-n8e-plane": "session",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success envelope { data, meta }"
+          },
+          "default": {
+            "description": "Error envelope { error: { code, message, fieldErrors?, requestId } }"
+          }
+        }
+      }
+    },
+    "/api/core/v1/auth/login": {
+      "post": {
+        "summary": "Password step of admin login; issues short-lived pending cookie",
+        "x-n8e-scope": null,
+        "x-n8e-plane": "public",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success envelope { data, meta }"
+          },
+          "default": {
+            "description": "Error envelope { error: { code, message, fieldErrors?, requestId } }"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "http://json-schema.org/draft-07/schema#",
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/core/v1/auth/logout": {
+      "post": {
+        "summary": "Invalidate the admin session cookie",
+        "x-n8e-scope": "collect:read",
+        "x-n8e-plane": "session",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success envelope { data, meta }"
+          },
+          "default": {
+            "description": "Error envelope { error: { code, message, fieldErrors?, requestId } }"
+          }
+        }
+      }
+    },
+    "/api/core/v1/auth/totp": {
+      "post": {
+        "summary": "TOTP step of admin login; issues the session cookie",
+        "x-n8e-scope": null,
+        "x-n8e-plane": "public",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success envelope { data, meta }"
+          },
+          "default": {
+            "description": "Error envelope { error: { code, message, fieldErrors?, requestId } }"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "http://json-schema.org/draft-07/schema#",
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 6,
+                    "maxLength": 8
+                  }
+                },
+                "required": ["code"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/core/v1/auth/totp/enrol": {
+      "post": {
+        "summary": "Begin TOTP enrolment; returns otpauth URL, QR data URL and secret (once)",
+        "x-n8e-scope": null,
+        "x-n8e-plane": "public",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success envelope { data, meta }"
+          },
+          "default": {
+            "description": "Error envelope { error: { code, message, fieldErrors?, requestId } }"
+          }
+        }
+      }
+    },
+    "/api/core/v1/health": {
+      "get": {
+        "summary": "Liveness/readiness: verifies DB connectivity",
+        "x-n8e-scope": null,
+        "x-n8e-plane": "public",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success envelope { data, meta }"
+          },
+          "default": {
+            "description": "Error envelope { error: { code, message, fieldErrors?, requestId } }"
+          }
+        }
+      }
+    }
+  }
+}

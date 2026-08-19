@@ -48,6 +48,11 @@ jobs:
           PGPASSWORD=n8e_dev_password psql -h localhost -U n8e -d n8e_collect \
             -c "CREATE DATABASE n8e_collect_test"
 
+      - name: OpenAPI up to date (contract drift gate)
+        run: |
+          pnpm api:openapi
+          git diff --exit-code openapi.json
+
       - name: Unit tests
         run: pnpm test
 
