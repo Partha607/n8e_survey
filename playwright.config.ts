@@ -16,12 +16,23 @@ export default defineConfig({
   },
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
-    { name: "mobile", use: { ...devices["Pixel 7"] } },
+    {
+      name: "mobile",
+      use: { ...devices["Pixel 7"] },
+      // admin auth mutates the single admin row — serial, desktop-only
+      // (respondent journeys get mobile coverage from Phase 2 on)
+      testIgnore: /auth\.spec\.ts/,
+    },
   ],
   webServer: {
     command: "pnpm dev",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    env: {
+      DATABASE_URL:
+        process.env.DATABASE_URL ??
+        "postgres://n8e:n8e_dev_password@localhost:5432/n8e_collect",
+    },
   },
 });
